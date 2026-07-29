@@ -532,6 +532,7 @@ func buildSelfUserData(user *model.User) map[string]interface{} {
 		"quota":             user.Quota,
 		"used_quota":        user.UsedQuota,
 		"request_count":     user.RequestCount,
+		"used_tokens":       user.UsedTokens,
 		"aff_code":          user.AffCode,
 		"aff_count":         user.AffCount,
 		"aff_quota":         user.AffQuota,
