@@ -109,7 +109,7 @@ func updateUserQuotaUsedQuotaRequestCountAndTokens(
 )
 ```
 
-渠道部分，当前 `BatchUpdateTypeChannelUsedQuota` 在通用循环中单独调用 `updateChannelUsedQuota`。改为：新增 `BatchUpdateTypeChannelUsedTokens` 也在通用循环中处理，扩展 `updateChannelUsedQuota` 同时更新两个字段。或合并到一次调用。
+渠道部分，当前 `BatchUpdateTypeChannelUsedQuota` 在通用循环中单独调用 `updateChannelUsedQuota`。将 `BatchUpdateTypeChannelUsedTokens` 也加入通用循环，合并到同一次 `updateChannelUsedQuota` 调用中——即 `updateChannelUsedQuota` 签名扩展为 `(id int, quota int, tokens int64)`，在同一 `gorm.Expr` map 中同时更新 `used_quota` 和 `used_tokens`。
 
 ### 4. API 响应
 
@@ -123,7 +123,7 @@ func updateUserQuotaUsedQuotaRequestCountAndTokens(
 
 #### 4.2 渠道列表
 
-Channel struct 已有 JSON tag `json:"used_tokens"`，GORM 查询自动返回。无需改 controller。
+Channel struct 新增 `UsedTokens int64` 字段（带 `json:"used_tokens"` tag），GORM 查询自动返回。无需改 controller——渠道列表 API 直接序列化 Channel struct。
 
 ### 5. QuotaData（无改动）
 
@@ -170,11 +170,11 @@ Channel struct 已有 JSON tag `json:"used_tokens"`，GORM 查询自动返回。
 
 **方案**：在普通渠道状态 Badge（line 963-970 的 `return <StatusBadge .../>`）外包一层 Tooltip，显示 Used Tokens。与用户状态列保持一致的结构：`StatusBadge` 作为 trigger，tooltip 显示 token 消耗。
 
-Tag 聚合行（line 869-897）的 tooltip 中也追加 token 信息，需从 `children` 聚合 `used_tokens`。`channel-utils.ts:678` 的 `tagRow.used_quota += channel.used_quota` 处同步增加 `tagRow.used_tokens += channel.used_tokens`。
+Tag 聚合行（line 869-897）的 tooltip 中也追加 token 信息，需从 `children` 聚合 `used_tokens`。`channel-utils.ts:678` 的 `tagRow.used_quota += channel.used_quota` 处同步增加 `tagRow.used_tokens += channel.used_tokens`。Tag row 的初始化（`channel-utils.ts:653`）也需加 `used_tokens: 0`。
 
 ### 9. 普通用户 /console
 
-普通用户 /console 的 Overview dashboard 中 `SummaryCards`（`web/src/features/dashboard/components/overview/summary-cards.tsx`）显示 `usedQuota` 和 `requestCount`。在 `useSummaryCardsConfig`（`use-dashboard-config.tsx:93-129`）的返回数组中新增一个 token 卡片，或在现有 summaryValues 中加入 `usedTokens`。
+普通用户 /console 的 Overview dashboard 中 `SummaryCards`（`web/src/features/dashboard/components/overview/summary-cards.tsx`）显示 `usedQuota` 和 `requestCount`。在 `summaryValues`（line 166-171）中加入 `usedTokens: Number(user?.used_tokens ?? 0)`，并在 `useSummaryCardsConfig`（`use-dashboard-config.tsx:93-129`）的返回数组中新增第四个卡片显示累计 token 消耗。`SummaryCards` 组件的 `StaggerContainer` grid 从 `grid-cols-3` 扩展为 `grid-cols-4`（或保持 3 列自适应换行）。
 
 同时，普通用户也能访问 Dashboard 的模型分析面板（与超管共用 `Dashboard` 组件），因此模型面板的 Quota/Tokens/Calls 切换对普通用户同样生效。
 
