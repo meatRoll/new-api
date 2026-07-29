@@ -870,44 +870,25 @@ export function useChannelsColumns(
             const childrenCount = (row.original as TagRow).children?.length || 0
             const hasEnabled = status === 1
 
-            const tagUsedTokens = (row.original as TagRow).children?.reduce(
-              (sum, ch) => sum + Number(ch.used_tokens ?? 0), 0
-            ) ?? 0
             if (hasEnabled) {
               return (
-                <Tooltip>
-                  <TooltipTrigger render={<div className='-ml-1.5 cursor-help' />}>
-                    <StatusBadge
-                      label={`Active (${childrenCount})`}
-                      variant='success'
-                      size='sm'
-                      copyable={false}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className='text-xs'>
-                      {t('Tokens:')} {tagUsedTokens.toLocaleString()}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
+                <StatusBadge
+                  label={`Active (${childrenCount})`}
+                  variant='success'
+                  size='sm'
+                  copyable={false}
+                  className='-ml-1.5'
+                />
               )
             } else {
               return (
-                <Tooltip>
-                  <TooltipTrigger render={<div className='-ml-1.5 cursor-help' />}>
-                    <StatusBadge
-                      label={`Inactive (${childrenCount})`}
-                      variant='neutral'
-                      size='sm'
-                      copyable={false}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className='text-xs'>
-                      {t('Tokens:')} {tagUsedTokens.toLocaleString()}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
+                <StatusBadge
+                  label={`Inactive (${childrenCount})`}
+                  variant='neutral'
+                  size='sm'
+                  copyable={false}
+                  className='-ml-1.5'
+                />
               )
             }
           }
@@ -971,9 +952,6 @@ export function useChannelsColumns(
                             {t('Time:')} {statusTime}
                           </div>
                         )}
-                        <div>
-                          {t('Tokens:')} {Number(channel.used_tokens ?? 0).toLocaleString()}
-                        </div>
                       </div>
                     </TooltipContent>
                   </Tooltip>
@@ -982,25 +960,13 @@ export function useChannelsColumns(
             }
           }
 
-          const usedTokens = Number(channel.used_tokens ?? 0)
           return (
-            <Tooltip>
-              <TooltipTrigger render={<div className='-ml-1.5 cursor-help' />}>
-                <StatusBadge
-                  label={label}
-                  variant={config.variant}
-                  size='sm'
-                  copyable={false}
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className='space-y-0.5 text-xs'>
-                  <div>
-                    {t('Tokens:')} {usedTokens.toLocaleString()}
-                  </div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
+            <StatusBadge
+              label={label}
+              variant={config.variant}
+              size='sm'
+              copyable={false}
+            />
           )
         },
         filterFn: (row, id, value) => {
@@ -1128,6 +1094,18 @@ export function useChannelsColumns(
         header: t('Used / Remaining'),
         cell: ({ row }) => <BalanceCell channel={row.original} />,
         size: 180,
+      },
+      // Used Tokens column
+      {
+        accessorKey: 'used_tokens',
+        header: t('Used Tokens'),
+        cell: ({ row }) => (
+          <span className='text-sm tabular-nums'>
+            {Number(row.original.used_tokens ?? 0).toLocaleString()}
+          </span>
+        ),
+        size: 120,
+        meta: { mobileHidden: true },
       },
 
       // Response Time column

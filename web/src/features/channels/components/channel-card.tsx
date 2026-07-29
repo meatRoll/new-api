@@ -61,6 +61,7 @@ function ChannelCardComponent({
 
   const fieldLabels: Record<string, string> = {
     balance: t('Used / Remaining'),
+    used_tokens: t('Used Tokens'),
     response_time: t('Response'),
     test_time: t('Last Tested'),
   }
@@ -75,6 +76,7 @@ function ChannelCardComponent({
   const priorityCell = renderCell('priority')
   const weightCell = renderCell('weight')
   const balanceCell = renderCell('balance')
+  const tokensCell = renderCell('used_tokens')
   const responseCell = renderCell('response_time')
   const testCell = renderCell('test_time')
 
@@ -127,6 +129,16 @@ function ChannelCardComponent({
               </div>
               <div className='min-w-0 overflow-hidden text-sm'>
                 {balanceCell ?? (
+                  <span className='text-muted-foreground'>-</span>
+                )}
+              </div>
+            </div>
+            <div className='min-w-0'>
+              <div className={cn('mb-1', labelClass)}>
+                {fieldLabels.used_tokens}
+              </div>
+              <div className='min-w-0 overflow-hidden text-sm'>
+                {tokensCell ?? (
                   <span className='text-muted-foreground'>-</span>
                 )}
               </div>
