@@ -870,25 +870,44 @@ export function useChannelsColumns(
             const childrenCount = (row.original as TagRow).children?.length || 0
             const hasEnabled = status === 1
 
+            const tagUsedTokens = (row.original as TagRow).children?.reduce(
+              (sum, ch) => sum + Number(ch.used_tokens ?? 0), 0
+            ) ?? 0
             if (hasEnabled) {
               return (
-                <StatusBadge
-                  label={`Active (${childrenCount})`}
-                  variant='success'
-                  size='sm'
-                  copyable={false}
-                  className='-ml-1.5'
-                />
+                <Tooltip>
+                  <TooltipTrigger render={<div className='-ml-1.5 cursor-help' />}>
+                    <StatusBadge
+                      label={`Active (${childrenCount})`}
+                      variant='success'
+                      size='sm'
+                      copyable={false}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className='text-xs'>
+                      {t('Tokens:')} {tagUsedTokens.toLocaleString()}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               )
             } else {
               return (
-                <StatusBadge
-                  label={`Inactive (${childrenCount})`}
-                  variant='neutral'
-                  size='sm'
-                  copyable={false}
-                  className='-ml-1.5'
-                />
+                <Tooltip>
+                  <TooltipTrigger render={<div className='-ml-1.5 cursor-help' />}>
+                    <StatusBadge
+                      label={`Inactive (${childrenCount})`}
+                      variant='neutral'
+                      size='sm'
+                      copyable={false}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className='text-xs'>
+                      {t('Tokens:')} {tagUsedTokens.toLocaleString()}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               )
             }
           }
@@ -952,6 +971,9 @@ export function useChannelsColumns(
                             {t('Time:')} {statusTime}
                           </div>
                         )}
+                        <div>
+                          {t('Tokens:')} {Number(channel.used_tokens ?? 0).toLocaleString()}
+                        </div>
                       </div>
                     </TooltipContent>
                   </Tooltip>
@@ -960,13 +982,25 @@ export function useChannelsColumns(
             }
           }
 
+          const usedTokens = Number(channel.used_tokens ?? 0)
           return (
-            <StatusBadge
-              label={label}
-              variant={config.variant}
-              size='sm'
-              copyable={false}
-            />
+            <Tooltip>
+              <TooltipTrigger render={<div className='-ml-1.5 cursor-help' />}>
+                <StatusBadge
+                  label={label}
+                  variant={config.variant}
+                  size='sm'
+                  copyable={false}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className='space-y-0.5 text-xs'>
+                  <div>
+                    {t('Tokens:')} {usedTokens.toLocaleString()}
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           )
         },
         filterFn: (row, id, value) => {

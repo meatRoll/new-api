@@ -651,6 +651,7 @@ export function aggregateChannelsByTag(
         status: undefined as unknown as number,
         group: '',
         used_quota: 0,
+        used_tokens: 0,
         response_time: 0,
         priority: -1 as unknown as number | null,
         weight: -1 as unknown as number | null,
@@ -676,6 +677,7 @@ export function aggregateChannelsByTag(
 
     // Aggregate used_quota (sum)
     tagRow.used_quota += channel.used_quota
+    tagRow.used_tokens += channel.used_tokens
 
     // Aggregate response_time (average)
     tagRow.response_time =
