@@ -127,6 +127,7 @@ export function useUsersColumns(): ColumnDef<User>[] {
       cell: ({ row }) => {
         const user = row.original
         const requestCount = user.request_count
+        const usedTokens = Number(user.used_tokens ?? 0)
 
         const statusConfig = isUserDeleted(user)
           ? USER_STATUSES[USER_STATUS.DELETED]
@@ -146,9 +147,14 @@ export function useUsersColumns(): ColumnDef<User>[] {
               />
             </TooltipTrigger>
             <TooltipContent>
-              <p className='text-xs'>
-                {t('Requests:')} {requestCount.toLocaleString()}
-              </p>
+              <div className='space-y-0.5 text-xs'>
+                <div>
+                  {t('Requests:')} {requestCount.toLocaleString()}
+                </div>
+                <div>
+                  {t('Tokens:')} {usedTokens.toLocaleString()}
+                </div>
+              </div>
             </TooltipContent>
           </Tooltip>
         )
