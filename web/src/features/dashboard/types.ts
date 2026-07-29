@@ -244,7 +244,10 @@ export interface ProcessedChartData {
   spec_rank_bar: VChartSpec
   totalQuotaDisplay: string
   totalCountDisplay: string
+  totalTokensDisplay: string
 }
+
+export type ModelAnalyticsMetric = 'quota' | 'tokens' | 'calls'
 
 export interface ProcessedUserChartData {
   spec_user_rank: VChartSpec

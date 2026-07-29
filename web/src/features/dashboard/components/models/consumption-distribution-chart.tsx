@@ -31,6 +31,7 @@ import {
 import { processChartData } from '@/features/dashboard/lib'
 import type {
   ConsumptionDistributionChartType,
+  ModelAnalyticsMetric,
   QuotaDataItem,
 } from '@/features/dashboard/types'
 import { useThemeRadiusPx } from '@/lib/theme-radius'
@@ -46,6 +47,7 @@ interface ConsumptionDistributionChartProps {
   loading?: boolean
   timeGranularity?: TimeGranularity
   defaultChartType?: ConsumptionDistributionChartType
+  metric?: ModelAnalyticsMetric
 }
 
 const CHART_TYPE_ICONS: Record<
@@ -74,6 +76,7 @@ export function ConsumptionDistributionChart(
     (typeof import('@visactor/vchart'))['ThemeManager'] | null
   >(null)
   const timeGranularity = props.timeGranularity ?? DEFAULT_TIME_GRANULARITY
+  const metric = props.metric ?? 'quota'
 
   useEffect(() => {
     if (props.defaultChartType) setChartType(props.defaultChartType)
@@ -104,9 +107,10 @@ export function ConsumptionDistributionChart(
         props.loading ? [] : props.data,
         timeGranularity,
         t,
-        chartRadius
+        chartRadius,
+        metric
       ),
-    [props.data, props.loading, timeGranularity, t, chartRadius]
+    [props.data, props.loading, timeGranularity, t, chartRadius, metric]
   )
   const spec = chartType === 'bar' ? chartData.spec_line : chartData.spec_area
   const specType = typeof spec?.type === 'string' ? spec.type : chartType
@@ -119,6 +123,17 @@ export function ConsumptionDistributionChart(
     customization.preset,
   ].join('-')
 
+  const titleByMetric: Record<ModelAnalyticsMetric, string> = {
+    quota: t('Quota Distribution'),
+    tokens: t('Token Distribution'),
+    calls: t('Call Distribution'),
+  }
+  const totalByMetric: Record<ModelAnalyticsMetric, string> = {
+    quota: chartData.totalQuotaDisplay,
+    tokens: chartData.totalTokensDisplay,
+    calls: chartData.totalCountDisplay,
+  }
+
   return (
     <div className='overflow-hidden rounded-lg border'>
       <div className='flex w-full flex-col gap-1.5 border-b px-3 py-2 sm:gap-3 sm:px-5 sm:py-3 lg:flex-row lg:items-center lg:justify-between'>
@@ -126,9 +141,9 @@ export function ConsumptionDistributionChart(
           <IconBadge tone='success' size='sm'>
             <WalletCards />
           </IconBadge>
-          <div className='text-sm font-semibold'>{t('Quota Distribution')}</div>
+          <div className='text-sm font-semibold'>{titleByMetric[metric]}</div>
           <span className='text-muted-foreground text-xs'>
-            {t('Total:')} {chartData.totalQuotaDisplay}
+            {t('Total:')} {totalByMetric[metric]}
           </span>
         </div>
 
