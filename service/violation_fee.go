@@ -128,8 +128,8 @@ func ChargeViolationFeeIfNeeded(ctx *gin.Context, relayInfo *relaycommon.RelayIn
 		return false
 	}
 
-	model.UpdateUserUsedQuotaAndRequestCount(relayInfo.UserId, feeQuota)
-	model.UpdateChannelUsedQuota(relayInfo.ChannelId, feeQuota)
+	model.UpdateUserUsedQuotaAndRequestCount(relayInfo.UserId, feeQuota, 0)
+	model.UpdateChannelUsedQuota(relayInfo.ChannelId, feeQuota, 0)
 
 	useTimeSeconds := time.Now().Unix() - relayInfo.StartTime.Unix()
 	tokenName := ctx.GetString("token_name")

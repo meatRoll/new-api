@@ -1307,35 +1307,32 @@ func UpdateUserLastLoginAt(id int) {
 	}
 }
 
-func UpdateUserUsedQuotaAndRequestCount(id int, quota int) {
+func UpdateUserUsedQuotaAndRequestCount(id int, quota int, tokens int64) {
 	if common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeUsedQuota, id, quota)
 		addNewRecord(BatchUpdateTypeRequestCount, id, 1)
+		addNewRecord(BatchUpdateTypeUsedTokens, id, int(tokens))
 		return
 	}
-	updateUserUsedQuotaAndRequestCount(id, quota, 1)
+	updateUserUsedQuotaAndRequestCount(id, quota, 1, tokens)
 }
 
-func updateUserUsedQuotaAndRequestCount(id int, quota int, count int) {
+func updateUserUsedQuotaAndRequestCount(id int, quota int, count int, tokens int64) {
 	err := DB.Model(&User{}).Where("id = ?", id).Updates(
 		map[string]interface{}{
 			"used_quota":    gorm.Expr("used_quota + ?", quota),
 			"request_count": gorm.Expr("request_count + ?", count),
+			"used_tokens":   gorm.Expr("used_tokens + ?", tokens),
 		},
 	).Error
 	if err != nil {
-		common.SysLog("failed to update user used quota and request count: " + err.Error())
+		common.SysLog("failed to update user used quota, request count and tokens: " + err.Error())
 		return
 	}
-
-	//// 更新缓存
-	//if err := invalidateUserCache(id); err != nil {
-	//	common.SysError("failed to invalidate user cache: " + err.Error())
-	//}
 }
 
-func updateUserQuotaUsedQuotaAndRequestCount(id int, quota int, usedQuota int, requestCount int) {
-	if quota == 0 && usedQuota == 0 && requestCount == 0 {
+func updateUserQuotaUsedQuotaRequestCountAndTokens(id int, quota int, usedQuota int, requestCount int, usedTokens int64) {
+	if quota == 0 && usedQuota == 0 && requestCount == 0 && usedTokens == 0 {
 		return
 	}
 
@@ -1344,10 +1341,11 @@ func updateUserQuotaUsedQuotaAndRequestCount(id int, quota int, usedQuota int, r
 			"quota":         gorm.Expr("quota + ?", quota),
 			"used_quota":    gorm.Expr("used_quota + ?", usedQuota),
 			"request_count": gorm.Expr("request_count + ?", requestCount),
+			"used_tokens":   gorm.Expr("used_tokens + ?", usedTokens),
 		},
 	).Error
 	if err != nil {
-		common.SysLog("failed to batch update user quota, used quota and request count: " + err.Error())
+		common.SysLog("failed to batch update user quota, used quota, request count and tokens: " + err.Error())
 	}
 }
 

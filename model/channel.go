@@ -859,18 +859,24 @@ func EditChannelByTag(tag string, newTag *string, modelMapping *string, models *
 	return nil
 }
 
-func UpdateChannelUsedQuota(id int, quota int) {
+func UpdateChannelUsedQuota(id int, quota int, tokens int64) {
 	if common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeChannelUsedQuota, id, quota)
+		addNewRecord(BatchUpdateTypeChannelUsedTokens, id, int(tokens))
 		return
 	}
-	updateChannelUsedQuota(id, quota)
+	updateChannelUsedQuota(id, quota, tokens)
 }
 
-func updateChannelUsedQuota(id int, quota int) {
-	err := DB.Model(&Channel{}).Where("id = ?", id).Update("used_quota", gorm.Expr("used_quota + ?", quota)).Error
+func updateChannelUsedQuota(id int, quota int, tokens int64) {
+	err := DB.Model(&Channel{}).Where("id = ?", id).Updates(
+		map[string]interface{}{
+			"used_quota":  gorm.Expr("used_quota + ?", quota),
+			"used_tokens": gorm.Expr("used_tokens + ?", tokens),
+		},
+	).Error
 	if err != nil {
-		common.SysLog(fmt.Sprintf("failed to update channel used quota: channel_id=%d, delta_quota=%d, error=%v", id, quota, err))
+		common.SysLog(fmt.Sprintf("failed to update channel used quota and tokens: channel_id=%d, delta_quota=%d, delta_tokens=%d, error=%v", id, quota, tokens, err))
 	}
 }
 
