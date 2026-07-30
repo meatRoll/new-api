@@ -4954,6 +4954,7 @@
     "Used to authenticate with io.net deployment API": "Used to authenticate with io.net deployment API",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "Used to authenticate with the worker. Leave blank to keep the existing secret.",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.",
+    "Used Tokens": "Used Tokens",
     "Used:": "Used:",
     "User": "User",
     "User {{id}}": "User {{id}}",
@@ -4986,6 +4987,8 @@
     "User promoted to admin successfully": "User promoted to admin successfully",
     "User selectable": "User selectable",
     "User Subscription Management": "User Subscription Management",
+    "User Token Ranking": "User Token Ranking",
+    "User Token Trend": "User Token Trend",
     "User updated successfully": "User updated successfully",
     "User Verification": "User Verification",
     "User-Agent include (one per line)": "User-Agent include (one per line)",
@@ -5233,7 +5236,6 @@
     "Zero retention": "Zero retention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom",
-    "Used Tokens": "Used Tokens"
+    "Zoom": "Zoom"
   }
 }

@@ -4954,6 +4954,7 @@
     "Used to authenticate with io.net deployment API": "Используется для аутентификации в API развертывания io.net",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "Используется для аутентификации с воркером. Оставьте пустым, чтобы сохранить существующий секрет.",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "Определяет платежный сценарий после нажатия. Встроенные ключи: stripe для Stripe и waffo_pancake для Waffo Pancake; остальные значения отправляются в Epay как параметр type.",
+    "Used Tokens": "Использованные токены",
     "Used:": "Использовано:",
     "User": "Пользователь",
     "User {{id}}": "Пользователь {{id}}",
@@ -4986,6 +4987,8 @@
     "User promoted to admin successfully": "Пользователь успешно повышен до администратора",
     "User selectable": "Доступно пользователю",
     "User Subscription Management": "Управление подписками пользователя",
+    "User Token Ranking": "Рейтинг токенов пользователя",
+    "User Token Trend": "Тренд токенов пользователя",
     "User updated successfully": "Пользователь успешно обновлен",
     "User Verification": "Проверка пользователя",
     "User-Agent include (one per line)": "User-Agent include (по одному на строку)",
@@ -5233,7 +5236,6 @@
     "Zero retention": "Без хранения данных",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom",
-    "Used Tokens": "Использованные токены"
+    "Zoom": "Zoom"
   }
 }

@@ -4954,6 +4954,7 @@
     "Used to authenticate with io.net deployment API": "用於 io.net 部署 API 鑒權",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "用於與 Worker 進行身份驗證。留空以保留現有金鑰。",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "用於決定點擊後走哪個支付流程。stripe 走 Stripe，waffo_pancake 走 Waffo Pancake；其他值會作為 Epay 的 type 參數提交。",
+    "Used Tokens": "消耗 Token",
     "Used:": "已使用：",
     "User": "用戶",
     "User {{id}}": "用戶 {{id}}",
@@ -4986,6 +4987,8 @@
     "User promoted to admin successfully": "已成功提升為管理員",
     "User selectable": "用戶可選",
     "User Subscription Management": "用戶訂閱管理",
+    "User Token Ranking": "用戶 Token 排行",
+    "User Token Trend": "用戶 Token 趨勢",
     "User updated successfully": "用戶更新成功",
     "User Verification": "用戶驗證",
     "User-Agent include (one per line)": "User-Agent include（每行一個）",
@@ -5233,7 +5236,6 @@
     "Zero retention": "零數據保留",
     "Zhipu": "智譜",
     "Zhipu V4": "智譜 V4",
-    "Zoom": "縮放",
-    "Used Tokens": "消耗 Token"
+    "Zoom": "縮放"
   }
 }

@@ -208,6 +208,7 @@ export interface UserChartsFilters {
   timeGranularity: TimeGranularity
   selectedRange: number
   topUserLimit: number
+  metric: UserAnalyticsMetric
 }
 
 // ============================================================================
@@ -248,6 +249,8 @@ export interface ProcessedChartData {
 }
 
 export type ModelAnalyticsMetric = 'quota' | 'tokens' | 'calls'
+
+export type UserAnalyticsMetric = 'quota' | 'tokens'
 
 export interface ProcessedUserChartData {
   spec_user_rank: VChartSpec

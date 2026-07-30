@@ -4954,6 +4954,7 @@
     "Used to authenticate with io.net deployment API": "io.net デプロイ API の認証に使用します",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "ワーカーの認証に使用されます。既存のシークレットを保持するには、空欄のままにしてください。",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "クリック後に使用する決済フローを決定します。組み込みキーは Stripe 用の stripe、Waffo Pancake 用の waffo_pancake です。それ以外の値は Epay の type パラメーターとして送信されます。",
+    "Used Tokens": "使用済みトークン",
     "Used:": "使用済み:",
     "User": "ユーザー",
     "User {{id}}": "ユーザー {{id}}",
@@ -4986,6 +4987,8 @@
     "User promoted to admin successfully": "ユーザーを管理者に昇格しました",
     "User selectable": "ユーザー選択可",
     "User Subscription Management": "ユーザーサブスクリプション管理",
+    "User Token Ranking": "ユーザートークンランキング",
+    "User Token Trend": "ユーザートークントレンド",
     "User updated successfully": "ユーザーの更新に成功しました",
     "User Verification": "ユーザー認証",
     "User-Agent include (one per line)": "User-Agent include（1行に1つ）",
@@ -5233,7 +5236,6 @@
     "Zero retention": "データ保持なし",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム",
-    "Used Tokens": "使用済みトークン"
+    "Zoom": "ズーム"
   }
 }

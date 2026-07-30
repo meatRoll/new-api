@@ -4954,6 +4954,7 @@
     "Used to authenticate with io.net deployment API": "Dùng để xác thực với API triển khai io.net",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "Dùng để xác thực với worker. Để trống để giữ nguyên secret hiện có.",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "Dùng để quyết định luồng thanh toán khi người dùng nhấp. Các khóa có sẵn gồm stripe cho Stripe và waffo_pancake cho Waffo Pancake; các giá trị khác được gửi tới Epay dưới dạng tham số type.",
+    "Used Tokens": "Token đã sử dụng",
     "Used:": "Đã dùng:",
     "User": "Người dùng",
     "User {{id}}": "Người dùng {{id}}",
@@ -4986,6 +4987,8 @@
     "User promoted to admin successfully": "Đã nâng cấp người dùng lên quản trị viên thành công",
     "User selectable": "Người dùng có thể chọn",
     "User Subscription Management": "Quản lý đăng ký người dùng",
+    "User Token Ranking": "Xếp hạng token người dùng",
+    "User Token Trend": "Xu hướng token người dùng",
     "User updated successfully": "Cập nhật người dùng thành công",
     "User Verification": "Xác minh người dùng",
     "User-Agent include (one per line)": "User-Agent include (mỗi dòng một mục)",
@@ -5233,7 +5236,6 @@
     "Zero retention": "Không lưu dữ liệu",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom",
-    "Used Tokens": "Token đã sử dụng"
+    "Zoom": "Zoom"
   }
 }
