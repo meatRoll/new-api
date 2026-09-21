@@ -29,6 +29,7 @@ export const DEFAULT_DASHBOARD_CHART_PREFERENCES: DashboardChartPreferences = {
   modelAnalyticsChart: 'trend',
   defaultTimeRangeDays: 1,
   defaultTimeGranularity: DEFAULT_TIME_GRANULARITY,
+  defaultModelMetric: 'tokens',
 }
 
 export const TIME_RANGE_BY_GRANULARITY = {

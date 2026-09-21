@@ -29,6 +29,10 @@ export interface QuotaDataItem {
   model_name?: string
   created_at: number
   token_used?: number
+  input_tokens?: number
+  output_tokens?: number
+  cache_read_tokens?: number
+  cache_write_tokens?: number
   count?: number
   quota?: number
 }
@@ -200,6 +204,7 @@ export interface DashboardChartPreferences {
   modelAnalyticsChart: ModelAnalyticsChartTab
   defaultTimeRangeDays: number
   defaultTimeGranularity: TimeGranularity
+  defaultModelMetric: ModelAnalyticsMetric
 }
 
 // User analytics selections are held by the dashboard parent so they survive

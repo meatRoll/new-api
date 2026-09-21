@@ -30,6 +30,7 @@ import type {
   DashboardChartPreferences,
   DashboardFilters,
   ModelAnalyticsChartTab,
+  ModelAnalyticsMetric,
 } from '@/features/dashboard/types'
 import { getRollingDateRange, type TimeGranularity } from '@/lib/time'
 
@@ -53,6 +54,10 @@ function isModelAnalyticsChartTab(
   value: unknown
 ): value is ModelAnalyticsChartTab {
   return value === 'trend' || value === 'proportion' || value === 'top'
+}
+
+function isModelAnalyticsMetric(value: unknown): value is ModelAnalyticsMetric {
+  return value === 'quota' || value === 'tokens' || value === 'calls'
 }
 
 function isTimeRangePresetDays(value: unknown): value is number {
@@ -119,6 +124,9 @@ export function getSavedChartPreferences(): DashboardChartPreferences {
       defaultTimeGranularity: isTimeGranularity(parsed.defaultTimeGranularity)
         ? parsed.defaultTimeGranularity
         : fallbackPreferences.defaultTimeGranularity,
+      defaultModelMetric: isModelAnalyticsMetric(parsed.defaultModelMetric)
+        ? parsed.defaultModelMetric
+        : fallbackPreferences.defaultModelMetric,
     }
   } catch {
     return fallbackPreferences

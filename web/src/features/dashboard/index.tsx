@@ -96,6 +96,12 @@ const LazyConsumptionDistributionChart = lazy(() =>
   }))
 )
 
+const LazyModelUsageTable = lazy(() =>
+  import('./components/models/model-usage-table').then((m) => ({
+    default: m.ModelUsageTable,
+  }))
+)
+
 const LazyPerformanceOverview = lazy(() =>
   import('./components/models/performance-overview').then((m) => ({
     default: m.PerformanceOverview,
@@ -207,7 +213,9 @@ export function Dashboard() {
   const [modelFilters, setModelFilters] = useState<DashboardFilters>(() =>
     buildDefaultDashboardFilters(getSavedChartPreferences())
   )
-  const [modelMetric, setModelMetric] = useState<ModelAnalyticsMetric>('quota')
+  const [modelMetric, setModelMetric] = useState<ModelAnalyticsMetric>(
+    () => getSavedChartPreferences().defaultModelMetric
+  )
   const [userChartsFilters, setUserChartsFilters] = useState<UserChartsFilters>(
     () => {
       const granularity = getSavedGranularity()
@@ -215,7 +223,7 @@ export function Dashboard() {
         timeGranularity: granularity,
         selectedRange: getDefaultDays(granularity),
         topUserLimit: 10,
-        metric: 'quota',
+        metric: 'tokens',
       }
     }
   )
@@ -240,6 +248,7 @@ export function Dashboard() {
   const handleChartPreferencesChange = useCallback(
     (preferences: DashboardChartPreferences) => {
       setChartPreferences(preferences)
+      setModelMetric(preferences.defaultModelMetric)
       setModelFilters(buildDefaultDashboardFilters(preferences))
       saveChartPreferences(preferences)
     },
@@ -413,6 +422,11 @@ export function Dashboard() {
                     }
                     metric={modelMetric}
                   />
+                </Suspense>
+              </FadeIn>
+              <FadeIn delay={0.2}>
+                <Suspense fallback={<ModelChartsFallback />}>
+                  <LazyModelUsageTable data={modelData} loading={dataLoading} />
                 </Suspense>
               </FadeIn>
             </>
