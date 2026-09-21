@@ -815,8 +815,8 @@ func TestResponsesWebSocketInitialUpstreamRejectionRefundsReservation(t *testing
 		t.Run(tc.name, func(t *testing.T) {
 			preConsumed := make(chan int, 1)
 			tokenID := make(chan int, 1)
-			// A fixed request fee guarantees a non-zero reservation under the current
-			// input-only tiered pre-consume policy.
+			// Output-priced expressions no longer reserve an estimated completion cost;
+			// use a fixed request fee to guarantee a non-zero reservation to refund.
 			fixture := newResponsesWSBillingTest(t, `tier("request", fixed(0.002))`, func(ws *websocket.Conn, _ *http.Request) {
 				if _, _, err := ws.ReadMessage(); !assert.NoError(t, err) {
 					return
