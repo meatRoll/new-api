@@ -29,7 +29,7 @@ import { useSummaryCardsConfig } from '@/features/dashboard/hooks/use-dashboard-
 import type { QuotaDataItem } from '@/features/dashboard/types'
 import { useStatus } from '@/hooks/use-status'
 import { getCurrencyLabel, isCurrencyDisplayEnabled } from '@/lib/currency'
-import { formatNumber, formatQuota } from '@/lib/format'
+import { formatCompactNumber, formatNumber, formatQuota } from '@/lib/format'
 import { requireServerSuccess } from '@/lib/server-error-message'
 import { computeTimeRange } from '@/lib/time'
 import { cn } from '@/lib/utils'
@@ -146,6 +146,7 @@ export function SummaryCards() {
   const remainQuota = Number(user?.quota ?? 0)
   const usedQuota = Number(user?.used_quota ?? 0)
   const requestCount = Number(user?.request_count ?? 0)
+  const usedTokens = Number(user?.used_tokens ?? 0)
 
   const usageTrendQuery = useQuery({
     queryKey: [
@@ -170,8 +171,9 @@ export function SummaryCards() {
     return {
       usedDisplay: formatQuota(usedQuota),
       requestCountDisplay: formatNumber(requestCount),
+      usedTokensDisplay: formatCompactNumber(usedTokens),
     }
-  }, [requestCount, usedQuota])
+  }, [requestCount, usedQuota, usedTokens])
 
   const currencyEnabledFromStore = isCurrencyDisplayEnabled()
   const statusCurrencyFlag =

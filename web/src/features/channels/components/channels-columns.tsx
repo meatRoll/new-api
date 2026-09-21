@@ -1175,6 +1175,18 @@ export function useChannelsColumns(
         cell: ({ row }) => <BalanceCell channel={row.original} />,
         size: 180,
       },
+      // Used Tokens column
+      {
+        accessorKey: 'used_tokens',
+        header: t('Used Tokens'),
+        cell: ({ row }) => (
+          <span className='text-sm tabular-nums'>
+            {Number(row.original.used_tokens ?? 0).toLocaleString()}
+          </span>
+        ),
+        size: 120,
+        meta: { mobileHidden: true },
+      },
 
       // Response Time column
       {

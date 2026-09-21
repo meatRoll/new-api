@@ -266,7 +266,7 @@ export function FlowCharts(props: FlowChartsProps) {
   } else if (isAdmin) {
     flowRole = 'admin'
   }
-  const [metric, setMetric] = useState<FlowMetric>('quota')
+  const [metric, setMetric] = useState<FlowMetric>('tokens')
   const [topNodeLimit, setTopNodeLimit] = useState(DEFAULT_FLOW_TOP_NODE_LIMIT)
   const [overflowMode, setOverflowMode] =
     useState<FlowOverflowMode>('aggregate')

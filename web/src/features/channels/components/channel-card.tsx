@@ -69,6 +69,7 @@ function ChannelCardComponent({
   const priorityCell = renderCell('priority')
   const weightCell = renderCell('weight')
   const balanceCell = renderCell('balance')
+  const tokensCell = renderCell('used_tokens')
   const responseCell = renderCell('response_time')
   const testCell = renderCell('test_time')
 
@@ -105,7 +106,7 @@ function ChannelCardComponent({
         {/* Both rows share their columns: identity/balance on the left,
           priority/response and weight/last tested on the right. */}
         <StatusBadgeTypeContext.Provider value='text'>
-          <div className='grid grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-3'>
+          <div className='grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-start gap-3'>
             <div className='min-w-0 overflow-hidden text-sm'>
               {!isTagRow && (
                 <div className={labelClass}>
@@ -122,11 +123,19 @@ function ChannelCardComponent({
               <span className={labelClass}>{t('Weight')}</span>
               {weightCell}
             </div>
-            <dl className='col-span-3 grid grid-cols-subgrid gap-y-1'>
+            <dl className='col-span-4 grid grid-cols-subgrid gap-y-1'>
               <div className='row-span-2 grid min-w-0 grid-rows-subgrid'>
                 <dt className={labelClass}>{t('Used / Remaining')}</dt>
                 <dd className='min-w-0 text-sm tabular-nums [&_[data-slot=status-badge]]:!ml-0 [&>div]:ml-0 [&>div]:flex-wrap [&>div]:gap-x-3'>
                   {balanceCell ?? (
+                    <span className='text-muted-foreground'>-</span>
+                  )}
+                </dd>
+              </div>
+              <div className='row-span-2 grid min-w-0 grid-rows-subgrid'>
+                <dt className={labelClass}>{t('Used Tokens')}</dt>
+                <dd className='min-w-0 text-sm tabular-nums [&_[data-slot=status-badge]]:!ml-0'>
+                  {tokensCell ?? (
                     <span className='text-muted-foreground'>-</span>
                   )}
                 </dd>

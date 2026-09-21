@@ -39,6 +39,7 @@ type Channel struct {
 	Models             string  `json:"models"`
 	Group              string  `json:"group" gorm:"type:varchar(64);default:'default'"`
 	UsedQuota          int64   `json:"used_quota" gorm:"bigint;default:0"`
+	UsedTokens         int64   `json:"used_tokens" gorm:"bigint;default:0;column:used_tokens"` // accumulated token consumption
 	ModelMapping       *string `json:"model_mapping" gorm:"type:text"`
 	//MaxInputTokens     *int    `json:"max_input_tokens" gorm:"default:0"`
 	StatusCodeMapping *string `json:"status_code_mapping" gorm:"type:varchar(1024);default:''"`
@@ -903,18 +904,28 @@ func EditChannelByTag(tag string, newTag *string, modelMapping *string, models *
 	return nil
 }
 
-func UpdateChannelUsedQuota(id int, quota int) {
+func UpdateChannelUsedQuota(id int, quota int, tokenCounts ...int64) {
+	tokens := int64(0)
+	if len(tokenCounts) > 0 {
+		tokens = tokenCounts[0]
+	}
 	if common.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeChannelUsedQuota, id, quota)
+		addNewRecord(BatchUpdateTypeChannelUsedTokens, id, int(tokens))
 		return
 	}
-	updateChannelUsedQuota(id, quota)
+	updateChannelUsedQuota(id, quota, tokens)
 }
 
-func updateChannelUsedQuota(id int, quota int) {
-	err := DB.Model(&Channel{}).Where("id = ?", id).Update("used_quota", gorm.Expr("used_quota + ?", quota)).Error
+func updateChannelUsedQuota(id int, quota int, tokens int64) {
+	err := DB.Model(&Channel{}).Where("id = ?", id).Updates(
+		map[string]interface{}{
+			"used_quota":  gorm.Expr("used_quota + ?", quota),
+			"used_tokens": gorm.Expr("used_tokens + ?", tokens),
+		},
+	).Error
 	if err != nil {
-		common.SysLog(fmt.Sprintf("failed to update channel used quota: channel_id=%d, delta_quota=%d, error=%v", id, quota, err))
+		common.SysLog(fmt.Sprintf("failed to update channel used quota and tokens: channel_id=%d, delta_quota=%d, delta_tokens=%d, error=%v", id, quota, tokens, err))
 	}
 }
 

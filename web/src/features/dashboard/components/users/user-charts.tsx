@@ -39,6 +39,7 @@ import {
 import type {
   ProcessedUserChartData,
   UserChartsFilters,
+  UserAnalyticsMetric,
 } from '@/features/dashboard/types'
 import { requireServerSuccess } from '@/lib/server-error-message'
 import { getRollingDateRange, type TimeGranularity } from '@/lib/time'
@@ -85,6 +86,7 @@ export function UserCharts(props: UserChartsProps) {
   const timeGranularity = props.filters.timeGranularity
   const selectedRange = props.filters.selectedRange
   const topUserLimit = props.filters.topUserLimit
+  const metric = props.filters.metric
   const onFiltersChange = props.onFiltersChange
 
   const timeRange = useMemo(() => {
@@ -121,6 +123,13 @@ export function UserCharts(props: UserChartsProps) {
     [onFiltersChange, props.filters]
   )
 
+  const handleMetricChange = useCallback(
+    (m: UserAnalyticsMetric) => {
+      onFiltersChange({ ...props.filters, metric: m })
+    },
+    [onFiltersChange, props.filters]
+  )
+
   useEffect(() => {
     const updateTheme = async () => {
       setThemeReady(false)
@@ -151,9 +160,10 @@ export function UserCharts(props: UserChartsProps) {
         isLoading ? [] : (userData ?? []),
         timeGranularity,
         t,
-        topUserLimit
+        topUserLimit,
+        metric
       ),
-    [userData, isLoading, timeGranularity, t, topUserLimit]
+    [userData, isLoading, timeGranularity, t, topUserLimit, metric]
   )
 
   return (
@@ -217,6 +227,28 @@ export function UserCharts(props: UserChartsProps) {
             ))}
           </TabsList>
         </Tabs>
+
+        <div className='bg-muted/60 inline-flex h-8 shrink-0 rounded-lg border p-0.5'>
+          {(
+            [
+              { value: 'quota', label: t('Quota') },
+              { value: 'tokens', label: t('Tokens') },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.value}
+              type='button'
+              onClick={() => handleMetricChange(opt.value)}
+              className={`shrink-0 rounded-md px-3 text-xs font-medium transition-colors ${
+                metric === opt.value
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
         {isLoading && (
           <Loader2 className='text-muted-foreground size-4 animate-spin' />

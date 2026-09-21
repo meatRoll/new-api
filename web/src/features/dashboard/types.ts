@@ -29,6 +29,10 @@ export interface QuotaDataItem {
   model_name?: string
   created_at: number
   token_used?: number
+  input_tokens?: number
+  output_tokens?: number
+  cache_read_tokens?: number
+  cache_write_tokens?: number
   count?: number
   quota?: number
 }
@@ -200,6 +204,7 @@ export interface DashboardChartPreferences {
   modelAnalyticsChart: ModelAnalyticsChartTab
   defaultTimeRangeDays: number
   defaultTimeGranularity: TimeGranularity
+  defaultModelMetric: ModelAnalyticsMetric
 }
 
 // User analytics selections are held by the dashboard parent so they survive
@@ -208,6 +213,7 @@ export interface UserChartsFilters {
   timeGranularity: TimeGranularity
   selectedRange: number
   topUserLimit: number
+  metric: UserAnalyticsMetric
 }
 
 // ============================================================================
@@ -244,7 +250,12 @@ export interface ProcessedChartData {
   spec_rank_bar: VChartSpec
   totalQuotaDisplay: string
   totalCountDisplay: string
+  totalTokensDisplay: string
 }
+
+export type ModelAnalyticsMetric = 'quota' | 'tokens' | 'calls'
+
+export type UserAnalyticsMetric = 'quota' | 'tokens'
 
 export interface ProcessedUserChartData {
   spec_user_rank: VChartSpec

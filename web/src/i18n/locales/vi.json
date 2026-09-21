@@ -6422,6 +6422,7 @@
     "Used to authenticate with io.net deployment API": "Dùng để xác thực với API triển khai io.net",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "Dùng để xác thực với worker. Để trống để giữ nguyên secret hiện có.",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "Dùng để quyết định luồng thanh toán khi người dùng nhấp. Các khóa có sẵn gồm stripe cho Stripe và waffo_pancake cho Waffo Pancake; các giá trị khác được gửi tới Epay dưới dạng tham số type.",
+    "Used Tokens": "Token đã sử dụng",
     "Used when a Task Plugin channel has no API address configured.": "Dùng khi kênh plugin tác vụ chưa được cấu hình địa chỉ API.",
     "Used:": "Đã dùng:",
     "User": "Người dùng",

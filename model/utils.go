@@ -19,7 +19,9 @@ const (
 	BatchUpdateTypeUsedQuota
 	BatchUpdateTypeChannelUsedQuota
 	BatchUpdateTypeRequestCount
-	BatchUpdateTypeCount // if you add a new type, you need to add a new map and a new lock
+	BatchUpdateTypeUsedTokens        // user token consumption
+	BatchUpdateTypeChannelUsedTokens // channel token consumption
+	BatchUpdateTypeCount             // if you add a new type, you need to add a new map and a new lock
 )
 
 var batchUpdateStores []map[int]int
@@ -88,28 +90,22 @@ func batchUpdate() {
 		batchUpdateLocks[i].Unlock()
 	}
 
-	for i, store := range stores {
-		if i == BatchUpdateTypeUserQuota || i == BatchUpdateTypeUsedQuota || i == BatchUpdateTypeRequestCount {
-			continue
-		}
-		for key, value := range store {
-			switch i {
-			case BatchUpdateTypeTokenQuota:
-				err := increaseTokenQuota(key, value)
-				if err != nil {
-					common.SysLog("failed to batch update token quota: " + err.Error())
-				}
-			case BatchUpdateTypeChannelUsedQuota:
-				updateChannelUsedQuota(key, value)
-			}
+	// Process token quota in the general loop (only non-merged type)
+	tokenQuotaStore := stores[BatchUpdateTypeTokenQuota]
+	for key, value := range tokenQuotaStore {
+		err := increaseTokenQuota(key, value)
+		if err != nil {
+			common.SysLog("failed to batch update token quota: " + err.Error())
 		}
 	}
 
+	// Merge user stores: quota + usedQuota + requestCount + usedTokens -> one update per user
 	userQuotaStore := stores[BatchUpdateTypeUserQuota]
 	usedQuotaStore := stores[BatchUpdateTypeUsedQuota]
 	requestCountStore := stores[BatchUpdateTypeRequestCount]
+	usedTokensStore := stores[BatchUpdateTypeUsedTokens]
 
-	userIDs := make(map[int]struct{}, len(userQuotaStore)+len(usedQuotaStore)+len(requestCountStore))
+	userIDs := make(map[int]struct{}, len(userQuotaStore)+len(usedQuotaStore)+len(requestCountStore)+len(usedTokensStore))
 	for key := range userQuotaStore {
 		userIDs[key] = struct{}{}
 	}
@@ -119,9 +115,27 @@ func batchUpdate() {
 	for key := range requestCountStore {
 		userIDs[key] = struct{}{}
 	}
-	for key := range userIDs {
-		updateUserQuotaUsedQuotaAndRequestCount(key, userQuotaStore[key], usedQuotaStore[key], requestCountStore[key])
+	for key := range usedTokensStore {
+		userIDs[key] = struct{}{}
 	}
+	for key := range userIDs {
+		updateUserQuotaUsedQuotaRequestCountAndTokens(key, userQuotaStore[key], usedQuotaStore[key], requestCountStore[key], int64(usedTokensStore[key]))
+	}
+
+	// Merge channel stores: usedQuota + usedTokens -> one update per channel
+	channelQuotaStore := stores[BatchUpdateTypeChannelUsedQuota]
+	channelTokenStore := stores[BatchUpdateTypeChannelUsedTokens]
+	channelIDs := make(map[int]struct{}, len(channelQuotaStore)+len(channelTokenStore))
+	for key := range channelQuotaStore {
+		channelIDs[key] = struct{}{}
+	}
+	for key := range channelTokenStore {
+		channelIDs[key] = struct{}{}
+	}
+	for key := range channelIDs {
+		updateChannelUsedQuota(key, channelQuotaStore[key], int64(channelTokenStore[key]))
+	}
+
 	common.SysLog("batch update finished")
 }
 

@@ -54,6 +54,7 @@ import {
 import type {
   DashboardChartPreferences,
   DashboardFilters,
+  ModelAnalyticsMetric,
   QuotaDataItem,
   UserChartsFilters,
 } from './types'
@@ -92,6 +93,12 @@ const LazyModelCharts = lazy(() =>
 const LazyConsumptionDistributionChart = lazy(() =>
   import('./components/models/consumption-distribution-chart').then((m) => ({
     default: m.ConsumptionDistributionChart,
+  }))
+)
+
+const LazyModelUsageTable = lazy(() =>
+  import('./components/models/model-usage-table').then((m) => ({
+    default: m.ModelUsageTable,
   }))
 )
 
@@ -206,6 +213,9 @@ export function Dashboard() {
   const [modelFilters, setModelFilters] = useState<DashboardFilters>(() =>
     buildDefaultDashboardFilters(getSavedChartPreferences())
   )
+  const [modelMetric, setModelMetric] = useState<ModelAnalyticsMetric>(
+    () => getSavedChartPreferences().defaultModelMetric
+  )
   const [userChartsFilters, setUserChartsFilters] = useState<UserChartsFilters>(
     () => {
       const granularity = getSavedGranularity()
@@ -213,6 +223,7 @@ export function Dashboard() {
         timeGranularity: granularity,
         selectedRange: getDefaultDays(granularity),
         topUserLimit: 10,
+        metric: 'tokens',
       }
     }
   )
@@ -237,6 +248,7 @@ export function Dashboard() {
   const handleChartPreferencesChange = useCallback(
     (preferences: DashboardChartPreferences) => {
       setChartPreferences(preferences)
+      setModelMetric(preferences.defaultModelMetric)
       setModelFilters(buildDefaultDashboardFilters(preferences))
       saveChartPreferences(preferences)
     },
@@ -276,6 +288,28 @@ export function Dashboard() {
           onFilterChange={handleFilterChange}
           onReset={handleResetFilters}
         />
+        <div className='bg-muted/60 inline-flex h-8 rounded-lg border p-0.5'>
+          {(
+            [
+              { value: 'quota', label: t('Quota') },
+              { value: 'tokens', label: t('Tokens') },
+              { value: 'calls', label: t('Calls') },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.value}
+              type='button'
+              onClick={() => setModelMetric(opt.value)}
+              className={`shrink-0 rounded-md px-3 text-xs font-medium transition-colors ${
+                modelMetric === opt.value
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </>
     ) : null
   const flowActions =
@@ -374,6 +408,7 @@ export function Dashboard() {
                     timeGranularity={
                       modelFilters.time_granularity || DEFAULT_TIME_GRANULARITY
                     }
+                    metric={modelMetric}
                   />
                 </Suspense>
               </FadeIn>
@@ -386,7 +421,13 @@ export function Dashboard() {
                     timeGranularity={
                       modelFilters.time_granularity || DEFAULT_TIME_GRANULARITY
                     }
+                    metric={modelMetric}
                   />
+                </Suspense>
+              </FadeIn>
+              <FadeIn delay={0.2}>
+                <Suspense fallback={<ModelChartsFallback />}>
+                  <LazyModelUsageTable data={modelData} loading={dataLoading} />
                 </Suspense>
               </FadeIn>
             </>

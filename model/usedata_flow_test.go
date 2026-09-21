@@ -139,28 +139,36 @@ func TestLogQuotaDataSplitsRowsByUseGroupTokenChannelAndNode(t *testing.T) {
 	CacheQuotaDataLock.Unlock()
 
 	LogQuotaData(QuotaDataLogParams{
-		UserID:    1,
-		Username:  "alice",
-		ModelName: "gpt-a",
-		CreatedAt: 3661,
-		UseGroup:  "vip",
-		TokenID:   11,
-		ChannelID: 1,
-		NodeName:  "node-a",
-		Quota:     100,
-		TokenUsed: 40,
+		UserID:           1,
+		Username:         "alice",
+		ModelName:        "gpt-a",
+		CreatedAt:        3661,
+		UseGroup:         "vip",
+		TokenID:          11,
+		ChannelID:        1,
+		NodeName:         "node-a",
+		Quota:            100,
+		TokenUsed:        40,
+		InputTokens:      25,
+		OutputTokens:     15,
+		CacheReadTokens:  10,
+		CacheWriteTokens: 5,
 	})
 	LogQuotaData(QuotaDataLogParams{
-		UserID:    1,
-		Username:  "alice",
-		ModelName: "gpt-a",
-		CreatedAt: 3700,
-		UseGroup:  "vip",
-		TokenID:   11,
-		ChannelID: 1,
-		NodeName:  "node-a",
-		Quota:     50,
-		TokenUsed: 20,
+		UserID:           1,
+		Username:         "alice",
+		ModelName:        "gpt-a",
+		CreatedAt:        3700,
+		UseGroup:         "vip",
+		TokenID:          11,
+		ChannelID:        1,
+		NodeName:         "node-a",
+		Quota:            50,
+		TokenUsed:        20,
+		InputTokens:      12,
+		OutputTokens:     8,
+		CacheReadTokens:  4,
+		CacheWriteTokens: 2,
 	})
 	LogQuotaData(QuotaDataLogParams{
 		UserID:    1,
@@ -188,6 +196,52 @@ func TestLogQuotaDataSplitsRowsByUseGroupTokenChannelAndNode(t *testing.T) {
 	require.Equal(t, 2, rows[0].Count)
 	require.Equal(t, 150, rows[0].Quota)
 	require.Equal(t, 60, rows[0].TokenUsed)
+	require.Equal(t, 37, rows[0].InputTokens)
+	require.Equal(t, 23, rows[0].OutputTokens)
+	require.Equal(t, 14, rows[0].CacheReadTokens)
+	require.Equal(t, 7, rows[0].CacheWriteTokens)
 	require.Equal(t, "default", rows[1].UseGroup)
 	require.Equal(t, 25, rows[1].Quota)
+}
+
+func TestGetQuotaDataByUserIDIncludesTokenBreakdown(t *testing.T) {
+	truncateTables(t)
+	seedFlowQuotaData(t, QuotaData{
+		UserID:           1,
+		Username:         "alice",
+		ModelName:        "gpt-a",
+		CreatedAt:        3600,
+		Count:            2,
+		Quota:            100,
+		TokenUsed:        40,
+		InputTokens:      25,
+		OutputTokens:     15,
+		CacheReadTokens:  10,
+		CacheWriteTokens: 5,
+	})
+	seedFlowQuotaData(t, QuotaData{
+		UserID:           1,
+		Username:         "alice",
+		ModelName:        "gpt-a",
+		CreatedAt:        3600,
+		Count:            1,
+		Quota:            50,
+		TokenUsed:        20,
+		InputTokens:      12,
+		OutputTokens:     8,
+		CacheReadTokens:  4,
+		CacheWriteTokens: 2,
+	})
+
+	rows, err := GetQuotaDataByUserId(1, 3600, 3600)
+
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, 3, rows[0].Count)
+	require.Equal(t, 150, rows[0].Quota)
+	require.Equal(t, 60, rows[0].TokenUsed)
+	require.Equal(t, 37, rows[0].InputTokens)
+	require.Equal(t, 23, rows[0].OutputTokens)
+	require.Equal(t, 14, rows[0].CacheReadTokens)
+	require.Equal(t, 7, rows[0].CacheWriteTokens)
 }

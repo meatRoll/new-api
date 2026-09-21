@@ -6422,6 +6422,7 @@
     "Used to authenticate with io.net deployment API": "Используется для аутентификации в API развертывания io.net",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "Используется для аутентификации с воркером. Оставьте пустым, чтобы сохранить существующий секрет.",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "Определяет платежный сценарий после нажатия. Встроенные ключи: stripe для Stripe и waffo_pancake для Waffo Pancake; остальные значения отправляются в Epay как параметр type.",
+    "Used Tokens": "Использованные токены",
     "Used when a Task Plugin channel has no API address configured.": "Используется, если для канала плагина задач не задан адрес API.",
     "Used:": "Использовано:",
     "User": "Пользователь",

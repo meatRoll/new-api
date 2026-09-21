@@ -6422,6 +6422,7 @@
     "Used to authenticate with io.net deployment API": "io.net デプロイ API の認証に使用します",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "ワーカーの認証に使用されます。既存のシークレットを保持するには、空欄のままにしてください。",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "クリック後に使用する決済フローを決定します。組み込みキーは Stripe 用の stripe、Waffo Pancake 用の waffo_pancake です。それ以外の値は Epay の type パラメーターとして送信されます。",
+    "Used Tokens": "使用済みトークン",
     "Used when a Task Plugin channel has no API address configured.": "タスクプラグインのチャネルに API アドレスが未設定の場合に使われます。",
     "Used:": "使用済み:",
     "User": "ユーザー",

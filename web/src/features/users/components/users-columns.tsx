@@ -195,6 +195,17 @@ export function useUsersColumns(): ColumnDef<User>[] {
         meta: { mobileOrder: 40 },
       },
       {
+        accessorKey: 'used_tokens',
+        header: t('Used Tokens'),
+        cell: ({ row }) => (
+          <span className='text-sm tabular-nums'>
+            {Number(row.original.used_tokens ?? 0).toLocaleString()}
+          </span>
+        ),
+        size: 120,
+        meta: { mobileHidden: true },
+      },
+      {
         accessorKey: 'group',
         header: t('User Group'),
         cell: ({ row }) => {

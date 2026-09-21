@@ -34,7 +34,7 @@ const defaultBillingSettings: BillingSettings = {
   'quota_setting.pre_consume_multiplier': 1,
   QuotaPerUnit: 500000,
   USDExchangeRate: 7,
-  'general_setting.quota_display_type': 'USD',
+  'general_setting.quota_display_type': 'TOKENS',
   'general_setting.custom_currency_symbol': '¤',
   'general_setting.custom_currency_exchange_rate': 1,
   DisplayInCurrencyEnabled: true,

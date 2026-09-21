@@ -20,9 +20,11 @@ import { dataScheme as vchartDefaultDataScheme } from '@visactor/vchart/esm/them
 
 import { MAX_CHART_TREND_POINTS } from '@/features/dashboard/constants'
 import type {
-  QuotaDataItem,
+  ModelAnalyticsMetric,
   ProcessedChartData,
   ProcessedUserChartData,
+  QuotaDataItem,
+  UserAnalyticsMetric,
 } from '@/features/dashboard/types'
 import { getCurrencyDisplay } from '@/lib/currency'
 import { formatChartTime, type TimeGranularity } from '@/lib/time'
@@ -71,7 +73,8 @@ export function processChartData(
   data: QuotaDataItem[],
   timeGranularity: TimeGranularity = 'day',
   t?: TFunction,
-  chartCornerRadius?: number
+  chartCornerRadius?: number,
+  metric: ModelAnalyticsMetric = 'quota'
 ): ProcessedChartData {
   const tt: TFunction = t ?? ((x) => x)
   const otherLabel = tt('Other')
@@ -80,6 +83,33 @@ export function processChartData(
     Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value)
   const formatQuotaValue = (value: number) => renderQuotaCompat(value, 4)
   const formatQuotaTotal = (value: number) => renderQuotaCompat(value, 2)
+  const formatTokens = (value: number) =>
+    Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value)
+
+  const getMetricValue = (stats?: {
+    quota: number
+    count: number
+    tokens: number
+  }): number => {
+    if (metric === 'tokens') return stats?.tokens ?? 0
+    if (metric === 'calls') return stats?.count ?? 0
+    return stats?.quota ?? 0
+  }
+
+  const formatMetric = (value: number): string => {
+    if (metric === 'quota') return formatQuotaValue(value)
+    return formatTokens(value)
+  }
+
+  const getMetricTitle = (
+    quotaTitle: string,
+    tokensTitle: string,
+    callsTitle: string
+  ): string => {
+    if (metric === 'tokens') return tokensTitle
+    if (metric === 'calls') return callsTitle
+    return quotaTitle
+  }
 
   const MAX_TOOLTIP_MODELS = 15
   const isOtherTooltipKey = (key: string) =>
@@ -106,7 +136,7 @@ export function processChartData(
           sum =
             Number((array[i].datum as Record<string, unknown>)?.TimeSum) || sum
         }
-        array[i].value = formatQuotaValue(v)
+        array[i].value = formatMetric(v)
       }
 
       if (collapseOverflow && array.length > MAX_TOOLTIP_MODELS) {
@@ -124,7 +154,7 @@ export function processChartData(
           ...visible,
           {
             key: otherLabel,
-            value: formatQuotaValue(otherSum),
+            value: formatMetric(otherSum),
             hasShape: true,
             shapeType: 'square',
             shapeFill: otherTooltipColor,
@@ -136,7 +166,7 @@ export function processChartData(
 
       array.unshift({
         key: tt('Total:'),
-        value: formatQuotaValue(sum),
+        value: formatMetric(sum),
       })
       return array
     }
@@ -154,7 +184,11 @@ export function processChartData(
         categoryField: 'type',
         title: {
           visible: true,
-          text: tt('Call Count Distribution'),
+          text: getMetricTitle(
+            tt('Quota Distribution'),
+            tt('Token Distribution'),
+            tt('Call Count Distribution')
+          ),
           subtext: tt('No data available'),
         },
         legends: { visible: false },
@@ -192,7 +226,11 @@ export function processChartData(
         legends: { visible: true, selectMode: 'single' },
         title: {
           visible: true,
-          text: tt('Call Trend'),
+          text: getMetricTitle(
+            tt('Quota Trend'),
+            tt('Token Trend'),
+            tt('Call Trend')
+          ),
         },
       },
       spec_rank_bar: {
@@ -204,10 +242,15 @@ export function processChartData(
         legends: { visible: true, selectMode: 'single' },
         title: {
           visible: true,
-          text: tt('Call Count Ranking'),
+          text: getMetricTitle(
+            tt('Quota Ranking'),
+            tt('Token Ranking'),
+            tt('Call Count Ranking')
+          ),
         },
       },
       totalQuotaDisplay: formatQuotaTotal(0),
+      totalTokensDisplay: formatTokens(0),
       totalCountDisplay: formatInt(0),
     }
   }
@@ -303,12 +346,16 @@ export function processChartData(
     (sum, x) => sum + (Number(x.quota) || 0),
     0
   )
+  const totalTokensRaw = Array.from(modelTotalsMap.values()).reduce(
+    (sum, x) => sum + (Number(x.tokens) || 0),
+    0
+  )
 
   // Pie chart (model call count proportion)
   const pieValues = Array.from(modelTotalsMap.entries())
     .map(([model, stats]) => ({
       type: model,
-      value: Number(stats.count) || 0,
+      value: getMetricValue(stats),
     }))
     .sort((a, b) => b.value - a.value)
 
@@ -324,10 +371,10 @@ export function processChartData(
   chartTimes.forEach((time) => {
     let timeData = sortedModels.map((model) => {
       const stats = timeModelMap.get(time)?.get(model)
-      const rawQuota = Number(stats?.quota) || 0
+      const rawQuota = getMetricValue(stats)
       const usd = rawQuota ? rawQuota / quotaPerUnit : 0
       // Match legacy frontend getQuotaWithUnit(..., 4)
-      const usage = usd ? Number(usd.toFixed(4)) : 0
+      const usage = metric === 'quota' ? Number(usd.toFixed(4)) : rawQuota
       return {
         Time: time,
         Model: model,
@@ -349,7 +396,7 @@ export function processChartData(
   const rankedQuotaModels = Array.from(modelTotalsMap.entries())
     .map(([model, stats]) => ({
       Model: model,
-      Quota: Number(stats.quota) || 0,
+      Quota: getMetricValue(stats),
     }))
     .sort((a, b) => b.Quota - a.Quota)
   const topAreaModels = new Set(
@@ -363,9 +410,9 @@ export function processChartData(
     let timeSum = 0
     sortedModels.forEach((model) => {
       const stats = modelMap?.get(model)
-      const rawQuota = Number(stats?.quota) || 0
+      const rawQuota = getMetricValue(stats)
       const usd = rawQuota ? rawQuota / quotaPerUnit : 0
-      const usage = usd ? Number(usd.toFixed(4)) : 0
+      const usage = metric === 'quota' ? Number(usd.toFixed(4)) : rawQuota
       timeSum += rawQuota
       const key = topAreaModels.has(model) ? model : otherLabel
       const prev = buckets.get(key) || { rawQuota: 0, usage: 0 }
@@ -391,7 +438,7 @@ export function processChartData(
   const rankedTrendModels = Array.from(modelTotalsMap.entries())
     .map(([model, stats]) => ({
       Model: model,
-      Count: Number(stats.count) || 0,
+      Count: getMetricValue(stats),
     }))
     .sort((a, b) => b.Count - a.Count)
   const topTrendModels = rankedTrendModels
@@ -412,13 +459,13 @@ export function processChartData(
       return {
         Time: time,
         Model: model,
-        Count: Number(stats?.count) || 0,
+        Count: getMetricValue(stats),
       }
     })
     if (otherTrendModels.length > 0) {
       const otherCount = otherTrendModels.reduce((sum, model) => {
         const stats = timeModelMap.get(time)?.get(model)
-        return sum + (Number(stats?.count) || 0)
+        return sum + getMetricValue(stats)
       }, 0)
       timeData.push({
         Time: time,
@@ -435,7 +482,7 @@ export function processChartData(
   const allRankValues = Array.from(modelTotalsMap.entries())
     .map(([model, stats]) => ({
       Model: model,
-      Count: Number(stats.count) || 0,
+      Count: getMetricValue(stats),
     }))
     .sort((a, b) => b.Count - a.Count)
 
@@ -469,7 +516,11 @@ export function processChartData(
       },
       title: {
         visible: true,
-        text: tt('Call Count Distribution'),
+        text: getMetricTitle(
+          tt('Quota Distribution'),
+          tt('Token Distribution'),
+          tt('Call Count Distribution')
+        ),
       },
       legends: { visible: true, orient: 'left' },
       label: { visible: true },
@@ -480,7 +531,7 @@ export function processChartData(
             {
               key: (datum: Record<string, unknown>) => datum?.type,
               value: (datum: Record<string, unknown>) =>
-                formatInt(Number(datum?.value) || 0),
+                formatMetric(Number(datum?.value) || 0),
             },
           ],
         },
@@ -508,7 +559,7 @@ export function processChartData(
             {
               key: (datum: Record<string, unknown>) => datum?.Model,
               value: (datum: Record<string, unknown>) =>
-                formatQuotaValue(Number(datum?.rawQuota) || 0),
+                formatMetric(Number(datum?.rawQuota) || 0),
             },
           ],
         },
@@ -541,7 +592,7 @@ export function processChartData(
             {
               key: (datum: Record<string, unknown>) => datum?.Model,
               value: (datum: Record<string, unknown>) =>
-                formatQuotaValue(Number(datum?.rawQuota) || 0),
+                formatMetric(Number(datum?.rawQuota) || 0),
             },
           ],
         },
@@ -585,7 +636,11 @@ export function processChartData(
       color: modelColor,
       title: {
         visible: true,
-        text: tt('Call Trend'),
+        text: getMetricTitle(
+          tt('Quota Trend'),
+          tt('Token Trend'),
+          tt('Call Trend')
+        ),
       },
       tooltip: {
         mark: {
@@ -593,7 +648,7 @@ export function processChartData(
             {
               key: (datum: Record<string, unknown>) => datum?.Model,
               value: (datum: Record<string, unknown>) =>
-                formatInt(Number(datum?.Count) || 0),
+                formatMetric(Number(datum?.Count) || 0),
             },
           ],
         },
@@ -626,11 +681,11 @@ export function processChartData(
             for (let i = 0; i < array.length; i++) {
               const v = Number(array[i].value) || 0
               sum += v
-              array[i].value = formatInt(v)
+              array[i].value = formatMetric(v)
             }
             array.unshift({
               key: tt('Total:'),
-              value: formatInt(sum),
+              value: formatMetric(sum),
             })
             return array
           },
@@ -662,7 +717,11 @@ export function processChartData(
       color: modelColor,
       title: {
         visible: true,
-        text: tt('Call Count Ranking'),
+        text: getMetricTitle(
+          tt('Quota Ranking'),
+          tt('Token Ranking'),
+          tt('Call Count Ranking')
+        ),
       },
       bar: {
         state: {
@@ -675,7 +734,7 @@ export function processChartData(
             {
               key: (datum: Record<string, unknown>) => datum?.Model,
               value: (datum: Record<string, unknown>) =>
-                formatInt(Number(datum?.Count) || 0),
+                formatMetric(Number(datum?.Count) || 0),
             },
           ],
         },
@@ -684,6 +743,7 @@ export function processChartData(
       animation: true,
     },
     totalQuotaDisplay: formatQuotaTotal(totalQuotaRaw),
+    totalTokensDisplay: formatTokens(totalTokensRaw),
     totalCountDisplay: formatInt(totalTimes),
   }
 }
@@ -705,13 +765,39 @@ export function processUserChartData(
   data: QuotaDataItem[],
   timeGranularity: TimeGranularity = 'day',
   t?: TFunction,
-  limit = 10
+  limit = 10,
+  metric: UserAnalyticsMetric = 'quota'
 ): ProcessedUserChartData {
   const tt: TFunction = t ?? ((x) => x)
   const { config } = getCurrencyDisplay()
   const quotaPerUnit = config.quotaPerUnit
 
   const formatVal = (raw: number) => renderQuotaCompat(raw, 2)
+  const formatTokens = (value: number) =>
+    Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value)
+
+  const getMetricValue = (stats?: {
+    quota: number
+    tokens: number
+  }): number => {
+    if (metric === 'tokens') return stats?.tokens ?? 0
+    return stats?.quota ?? 0
+  }
+
+  const formatMetric = (value: number): string => {
+    if (metric === 'quota') return formatVal(value)
+    return formatTokens(value)
+  }
+
+  const getMetricTitle = (quotaTitle: string, tokensTitle: string): string => {
+    if (metric === 'tokens') return tokensTitle
+    return quotaTitle
+  }
+
+  const toUsage = (rawValue: number): number =>
+    metric === 'quota'
+      ? Number((rawValue / quotaPerUnit).toFixed(4))
+      : rawValue
 
   const emptyResult: ProcessedUserChartData = {
     spec_user_rank: {
@@ -723,7 +809,10 @@ export function processUserChartData(
       direction: 'horizontal',
       title: {
         visible: true,
-        text: tt('User Consumption Ranking'),
+        text: getMetricTitle(
+          tt('User Consumption Ranking'),
+          tt('User Token Ranking')
+        ),
         subtext: tt('No data available'),
       },
       legends: { visible: false },
@@ -738,7 +827,10 @@ export function processUserChartData(
       seriesField: 'User',
       title: {
         visible: true,
-        text: tt('User Consumption Trend'),
+        text: getMetricTitle(
+          tt('User Consumption Trend'),
+          tt('User Token Trend')
+        ),
         subtext: tt('No data available'),
       },
       legends: { visible: true, selectMode: 'single' },
@@ -750,25 +842,33 @@ export function processUserChartData(
 
   if (!data || data.length === 0) return emptyResult
 
-  const userQuotaTotal = new Map<string, number>()
+  const userStatsTotal = new Map<string, { quota: number; tokens: number }>()
   data.forEach((item) => {
     const username = item.username || 'unknown'
-    const prev = userQuotaTotal.get(username) || 0
-    userQuotaTotal.set(username, prev + (Number(item.quota) || 0))
+    const prev = userStatsTotal.get(username) || { quota: 0, tokens: 0 }
+    userStatsTotal.set(username, {
+      quota: prev.quota + (Number(item.quota) || 0),
+      tokens: prev.tokens + (Number(item.token_used) || 0),
+    })
   })
 
-  const sorted = Array.from(userQuotaTotal.entries()).sort(
-    (a, b) => b[1] - a[1]
+  const sorted = Array.from(userStatsTotal.entries()).sort(
+    (a, b) => getMetricValue(b[1]) - getMetricValue(a[1])
   )
   const topUsers = sorted.slice(0, limit).map(([u]) => u)
   const topUserSet = new Set(topUsers)
-  const totalQuota = sorted.slice(0, limit).reduce((s, [, q]) => s + q, 0)
+  const totalValue = sorted
+    .slice(0, limit)
+    .reduce((s, [, stats]) => s + getMetricValue(stats), 0)
 
-  const rankValues = sorted.slice(0, limit).map(([username, quota]) => ({
-    User: username,
-    rawQuota: quota,
-    Usage: Number((quota / quotaPerUnit).toFixed(4)),
-  }))
+  const rankValues = sorted.slice(0, limit).map(([username, stats]) => {
+    const rawValue = getMetricValue(stats)
+    return {
+      User: username,
+      rawQuota: rawValue,
+      Usage: toUsage(rawValue),
+    }
+  })
 
   const userColorMap = topUsers.reduce<Record<string, string>>(
     (acc, user, i) => {
@@ -789,7 +889,11 @@ export function processUserChartData(
     if (!topUserSet.has(user)) return
     if (!timeUserMap.has(timeKey)) timeUserMap.set(timeKey, new Map())
     const map = timeUserMap.get(timeKey)!
-    map.set(user, (map.get(user) || 0) + (Number(item.quota) || 0))
+    const value = getMetricValue({
+      quota: Number(item.quota) || 0,
+      tokens: Number(item.token_used) || 0,
+    })
+    map.set(user, (map.get(user) || 0) + value)
   })
 
   const sortedTimePoints = Array.from(allTimePoints).sort()
@@ -807,7 +911,7 @@ export function processUserChartData(
         Time: time,
         User: user,
         rawQuota: q,
-        Usage: Number((q / quotaPerUnit).toFixed(4)),
+        Usage: toUsage(q),
       })
     })
   })
@@ -822,8 +926,11 @@ export function processUserChartData(
       direction: 'horizontal',
       title: {
         visible: true,
-        text: tt('User Consumption Ranking'),
-        subtext: `${tt('Total:')} ${formatVal(totalQuota)}`,
+        text: getMetricTitle(
+          tt('User Consumption Ranking'),
+          tt('User Token Ranking')
+        ),
+        subtext: `${tt('Total:')} ${formatMetric(totalValue)}`,
       },
       legends: { visible: false },
       bar: {
@@ -832,7 +939,7 @@ export function processUserChartData(
       label: {
         visible: true,
         position: 'outside',
-        formatMethod: (value: number) => formatVal(value),
+        formatMethod: (value: number) => formatMetric(value),
         style: { fontSize: 11 },
       },
       axes: [
@@ -845,7 +952,7 @@ export function processUserChartData(
             {
               key: (datum: Record<string, unknown>) => datum?.User,
               value: (datum: Record<string, unknown>) =>
-                formatVal(Number(datum?.rawQuota) || 0),
+                formatMetric(Number(datum?.rawQuota) || 0),
             },
           ],
           updateContent: (
@@ -859,7 +966,7 @@ export function processUserChartData(
               const rawQuota = array[i].datum?.rawQuota
               const value =
                 rawQuota === undefined ? array[i].value : Number(rawQuota)
-              array[i].value = formatVal(Number(value) || 0)
+              array[i].value = formatMetric(Number(value) || 0)
             }
             return array
           },
@@ -878,8 +985,11 @@ export function processUserChartData(
       stack: false,
       title: {
         visible: true,
-        text: tt('User Consumption Trend'),
-        subtext: `${tt('Total:')} ${formatVal(totalQuota)}`,
+        text: getMetricTitle(
+          tt('User Consumption Trend'),
+          tt('User Token Trend')
+        ),
+        subtext: `${tt('Total:')} ${formatMetric(totalValue)}`,
       },
       legends: { visible: true, selectMode: 'single' },
       axes: [
@@ -888,7 +998,7 @@ export function processUserChartData(
           orient: 'left',
           type: 'linear',
           label: {
-            formatMethod: (value: number) => formatVal(value),
+            formatMethod: (value: number) => formatMetric(value),
           },
         },
       ],
@@ -898,7 +1008,7 @@ export function processUserChartData(
             {
               key: (datum: Record<string, unknown>) => datum?.User,
               value: (datum: Record<string, unknown>) =>
-                formatVal(Number(datum?.rawQuota) || 0),
+                formatMetric(Number(datum?.rawQuota) || 0),
             },
           ],
         },
@@ -923,11 +1033,11 @@ export function processUserChartData(
             for (let i = 0; i < array.length; i++) {
               const v = Number(array[i].value) || 0
               sum += v
-              array[i].value = formatVal(v)
+              array[i].value = formatMetric(v)
             }
             array.unshift({
               key: tt('Total:'),
-              value: formatVal(sum),
+              value: formatMetric(sum),
             })
             return array
           },

@@ -6422,6 +6422,7 @@
     "Used to authenticate with io.net deployment API": "用于 io.net 部署 API 鉴权",
     "Used to authenticate with the worker. Leave blank to keep the existing secret.": "用于与 Worker 进行身份验证。留空以保留现有密钥。",
     "Used to decide the payment flow. Built-in keys include stripe for Stripe and waffo_pancake for Waffo Pancake; other values are sent to Epay as the type parameter.": "用于决定点击后走哪个支付流程。stripe 走 Stripe，waffo_pancake 走 Waffo Pancake；其他值会作为 Epay 的 type 参数提交。",
+    "Used Tokens": "消耗 Token",
     "Used when a Task Plugin channel has no API address configured.": "任务插件渠道未填写 API 地址时使用此默认值。",
     "Used:": "已使用：",
     "User": "用户",

@@ -31,6 +31,7 @@ import {
 import { processChartData } from '@/features/dashboard/lib'
 import type {
   ModelAnalyticsChartTab,
+  ModelAnalyticsMetric,
   QuotaDataItem,
 } from '@/features/dashboard/types'
 import { useThemeRadiusPx } from '@/lib/theme-radius'
@@ -54,6 +55,7 @@ interface ModelChartsProps {
   loading?: boolean
   timeGranularity?: TimeGranularity
   defaultChartTab?: ModelAnalyticsChartTab
+  metric?: ModelAnalyticsMetric
 }
 
 export function ModelCharts(props: ModelChartsProps) {
@@ -72,6 +74,7 @@ export function ModelCharts(props: ModelChartsProps) {
     (typeof import('@visactor/vchart'))['ThemeManager'] | null
   >(null)
   const timeGranularity = props.timeGranularity ?? DEFAULT_TIME_GRANULARITY
+  const metric = props.metric ?? 'quota'
 
   useEffect(() => {
     if (props.defaultChartTab) setActiveTab(props.defaultChartTab)
@@ -102,9 +105,10 @@ export function ModelCharts(props: ModelChartsProps) {
         props.loading ? [] : props.data,
         timeGranularity,
         t,
-        chartRadius
+        chartRadius,
+        metric
       ),
-    [props.data, props.loading, timeGranularity, t, chartRadius]
+    [props.data, props.loading, timeGranularity, t, chartRadius, metric]
   )
 
   const spec = chartData[CHART_SPEC_KEYS[activeTab]]
@@ -118,6 +122,12 @@ export function ModelCharts(props: ModelChartsProps) {
     customization.preset,
   ].join('-')
 
+  const totalByMetric: Record<ModelAnalyticsMetric, string> = {
+    quota: chartData.totalQuotaDisplay,
+    tokens: chartData.totalTokensDisplay,
+    calls: chartData.totalCountDisplay,
+  }
+
   return (
     <div className='overflow-hidden rounded-lg border'>
       <div className='flex w-full flex-col gap-1.5 border-b px-3 py-2 sm:gap-3 sm:px-5 sm:py-3 lg:flex-row lg:items-center lg:justify-between'>
@@ -129,7 +139,7 @@ export function ModelCharts(props: ModelChartsProps) {
             {t('Model Call Analytics')}
           </div>
           <span className='text-muted-foreground text-xs'>
-            {t('Total:')} {chartData.totalCountDisplay}
+            {t('Total:')} {totalByMetric[metric]}
           </span>
         </div>
 
